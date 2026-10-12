@@ -2,7 +2,7 @@
 # Environment variables
 .env
 .env.*
-!.env.local
+!.env.example
 
 # Dependencies
 node_modules/
