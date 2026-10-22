@@ -11,6 +11,7 @@ export async function GET(request: NextRequest) {
     const q = (searchParams.get("q") ?? "").trim();
     const model = (searchParams.get("model") ?? "").trim();
     const processor = (searchParams.get("processor") ?? "").trim();
+    const status = (searchParams.get("status") ?? "").trim().toUpperCase();
 
     const page = Math.max(1, Number(searchParams.get("page") ?? 1));
     const limit = Math.min(
@@ -31,6 +32,7 @@ export async function GET(request: NextRequest) {
         OR asset_identification_number ILIKE $${params.length}
         OR processor ILIKE $${params.length}
         OR serial_number ILIKE $${params.length}
+        OR status ILIKE $${params.length}
       )`);
     }
 
@@ -43,6 +45,11 @@ export async function GET(request: NextRequest) {
       params.push(processor);
       where.push(`processor = $${params.length}`);
     }
+
+    if (["USED", "IDLE", "ERROR"].includes(status)) {
+  params.push(status);
+  where.push(`UPPER(status) = $${params.length}`);
+}
 
     const whereSql = where.length
       ? `WHERE ${where.join(" AND ")}`
@@ -66,7 +73,8 @@ export async function GET(request: NextRequest) {
         product_model AS "productModel",
         asset_identification_number AS "assetIdentificationNumber",
         processor,
-        serial_number AS "serialNumber"
+        serial_number AS "serialNumber",
+        status
        FROM assets
        ${whereSql}
        ORDER BY asset_number ASC

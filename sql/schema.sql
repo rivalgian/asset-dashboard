@@ -25,3 +25,6 @@ CREATE TABLE IF NOT EXISTS users (
 
 CREATE INDEX IF NOT EXISTS idx_users_username ON users(username);
 CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
+
+ALTER TABLE assets
+ADD COLUMN IF NOT EXISTS status VARCHAR(20) NOT NULL DEFAULT 'IDLE';

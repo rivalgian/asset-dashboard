@@ -25,6 +25,7 @@ type Asset = {
   assetIdentificationNumber: string;
   processor: string;
   serialNumber: string;
+  status: "USED" | "IDLE" | "ERROR";
 };
 
 type Stats = {
@@ -75,6 +76,7 @@ export default function Dashboard() {
   const [q, setQ] = useState("");
   const [model, setModel] = useState("");
   const [processor, setProcessor] = useState("");
+  const [status, setStatus] = useState("");
 
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -132,6 +134,7 @@ export default function Dashboard() {
         q,
         model,
         processor,
+        status,
       });
 
       const response = await fetch(`/api/assets?${params}`);
@@ -162,7 +165,7 @@ export default function Dashboard() {
 
   useEffect(() => {
     loadAssets();
-  }, [q, model, processor, page]);
+  }, [q, model, processor, status, page]);
 
   // =========================
   // FILTER
@@ -172,6 +175,7 @@ export default function Dashboard() {
     setQ("");
     setModel("");
     setProcessor("");
+    setStatus("");
     setPage(1);
   };
 
@@ -919,6 +923,19 @@ export default function Dashboard() {
 
             </select>
 
+            <select
+  value={status}
+  onChange={(e) => {
+    setStatus(e.target.value);
+    setPage(1);
+  }}
+>
+  <option value="">Semua status</option>
+  <option value="USED">USED</option>
+  <option value="IDLE">IDLE</option>
+  <option value="ERROR">ERROR</option>
+</select>
+
           </div>
 
           {/* TABLE */}
@@ -952,6 +969,10 @@ export default function Dashboard() {
                   </th>
 
                   <th>
+                    Status
+                  </th>
+
+                  <th>
                     Action
                   </th>
 
@@ -966,7 +987,7 @@ export default function Dashboard() {
                   <tr>
 
                     <td
-                      colSpan={6}
+                      colSpan={7}
                       className="empty"
                     >
                       Memuat data...
@@ -979,7 +1000,7 @@ export default function Dashboard() {
                   <tr>
 
                     <td
-                      colSpan={6}
+                      colSpan={7}
                       className="empty"
                     >
                       Tidak ada aset yang cocok.
@@ -1023,6 +1044,12 @@ export default function Dashboard() {
                           {a.serialNumber}
                         </code>
 
+                      </td>
+
+                      <td>
+                      <span className={`statusBadge status-${a.status.toLowerCase()}`}>
+                          {a.status}
+                       </span>
                       </td>
 
                       <td>
