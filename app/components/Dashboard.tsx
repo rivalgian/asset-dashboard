@@ -46,6 +46,8 @@ type FormData = {
   assetIdentificationNumber: string;
   processor: string;
   serialNumber: string;
+  status: "USED" | "IDLE" | "ERROR";
+
 };
 
 const emptyForm: FormData = {
@@ -54,6 +56,7 @@ const emptyForm: FormData = {
   assetIdentificationNumber: "",
   processor: "",
   serialNumber: "",
+  status: "IDLE",
 };
 
 const chartColors = [
@@ -221,6 +224,7 @@ export default function Dashboard() {
       assetIdentificationNumber: asset.assetIdentificationNumber,
       processor: asset.processor,
       serialNumber: asset.serialNumber,
+      status: asset.status,
     });
 
     setShowModal(true);
@@ -278,6 +282,7 @@ export default function Dashboard() {
           form.assetIdentificationNumber.trim(),
         processor: form.processor.trim(),
         serialNumber: form.serialNumber.trim(),
+          status: form.status,
       };
 
       const response = await fetch("/api/assets", {
@@ -1272,6 +1277,25 @@ export default function Dashboard() {
                 />
 
               </div>
+
+              <div className="formGroup full">
+  <label>Status Aset</label>
+
+  <select
+    value={form.status}
+    onChange={(e) =>
+      updateForm(
+        "status",
+        e.target.value as "USED" | "IDLE" | "ERROR"
+      )
+    }
+  >
+    <option value="USED">USED - Sedang digunakan</option>
+    <option value="IDLE">IDLE - Tidak digunakan</option>
+    <option value="ERROR">ERROR - Bermasalah</option>
+  </select>
+</div>
+
 
             </div>
 

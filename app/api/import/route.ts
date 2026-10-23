@@ -11,7 +11,8 @@ const REQUIRED_HEADERS = [
   "Asset - Product Model Number",
   "Asset - Asset Identification Number",
   "Asset - Processor",
-  "Asset - Serial Number"
+  "Asset - Serial Number",
+  "Status"
 ];
 
 function normalizeHeader(value: unknown) {
@@ -141,6 +142,17 @@ export async function POST(request: Request) {
         column(row, "Asset - Serial Number")
       );
 
+      const status = normalizeText(
+  column(row, "Status")
+).toUpperCase();
+
+if (!["USED", "IDLE", "ERROR"].includes(status)) {
+  errors.push(
+    `Baris ${excelRow}: Status harus USED, IDLE, atau ERROR.`
+  );
+  continue;
+}
+
       if (
         !assetNumberText ||
         !Number.isSafeInteger(assetNumber) ||
@@ -178,7 +190,8 @@ export async function POST(request: Request) {
         productModel,
         assetId,
         processor,
-        serialNumber
+        serialNumber,
+        status
       });
     }
 
@@ -211,14 +224,15 @@ export async function POST(request: Request) {
       await client.query(
         `INSERT INTO assets
           (asset_number, product_model, asset_identification_number,
-           processor, serial_number)
-         VALUES ($1, $2, $3, $4, $5)`,
+           processor, serial_number, status)
+         VALUES ($1, $2, $3, $4, $5, $6)`,
         [
           asset.assetNumber,
           asset.productModel,
           asset.assetId,
           asset.processor,
-          asset.serialNumber
+          asset.serialNumber,
+          asset.status
         ]
       );
     }

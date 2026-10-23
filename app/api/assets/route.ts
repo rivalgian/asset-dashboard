@@ -194,41 +194,49 @@ export async function PUT(request: NextRequest) {
       productModel,
       assetIdentificationNumber,
       processor,
-      serialNumber
+      serialNumber,
+      status
     } = body;
 
-    if (!id) {
-      return NextResponse.json(
-        { error: "ID asset tidak ditemukan." },
-        { status: 400 }
-      );
-    }
+    
+const normalizedStatus = String(status ?? "").trim().toUpperCase();
 
-    const result = await pool.query(
-      `UPDATE assets
-       SET
-         asset_number = $1,
-         product_model = $2,
-         asset_identification_number = $3,
-         processor = $4,
-         serial_number = $5
-       WHERE id = $6
-       RETURNING
-         id,
-         asset_number AS "assetNumber",
-         product_model AS "productModel",
-         asset_identification_number AS "assetIdentificationNumber",
-         processor,
-         serial_number AS "serialNumber"`,
-      [
-        assetNumber,
-        productModel,
-        assetIdentificationNumber,
-        processor,
-        serialNumber,
-        id
-      ]
-    );
+if (!["USED", "IDLE", "ERROR"].includes(normalizedStatus)) {
+  return NextResponse.json(
+    { error: "Status harus USED, IDLE, atau ERROR." },
+    { status: 400 }
+  );
+}
+
+const result = await pool.query(
+  `UPDATE assets
+   SET
+     asset_number = $1,
+     product_model = $2,
+     asset_identification_number = $3,
+     processor = $4,
+     serial_number = $5,
+     status = $6
+   WHERE id = $7
+   RETURNING
+     id,
+     asset_number AS "assetNumber",
+     product_model AS "productModel",
+     asset_identification_number AS "assetIdentificationNumber",
+     processor,
+     serial_number AS "serialNumber",
+     status`,
+  [
+    assetNumber,
+    productModel,
+    assetIdentificationNumber,
+    processor,
+    serialNumber,
+    normalizedStatus,
+    id
+  ]
+);
+
 
     if (!result.rowCount) {
       return NextResponse.json(
